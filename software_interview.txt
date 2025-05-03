@@ -1,0 +1,285 @@
+Concepts related to C++
+
+In software development, understanding key concepts like **callbacks** and **threading** helps you write efficient, scalable, and maintainable programs. Here's a breakdown of **important foundational concepts** you should be familiar with:
+
+---
+
+### 1. **Callbacks**
+
+* **What it is:** A function passed as an argument to another function, to be "called back" later.
+* **Why it's important:** Enables **asynchronous programming**, **event-driven systems**, and **decoupling** of logic.
+* **Example:** Used in GUI frameworks (e.g., a button click handler) or in asynchronous APIs (e.g., `fetch().then()` in JavaScript).
+
+---
+
+### 2. **Threading**
+
+* **What it is:** Executing multiple sequences of instructions (threads) concurrently.
+* **Why it's important:** Utilizes multiple CPU cores; good for tasks like I/O waiting, background processing.
+* **Challenges:** Race conditions, deadlocks, thread synchronization.
+* **Alternatives/Related:** Async/await, multiprocessing, coroutines (e.g., `asyncio` in Python).
+
+---
+
+### 3. **Memory Management**
+
+* **What it is:** Allocation and deallocation of memory during a program’s lifecycle.
+* **Manual vs Automatic:** C/C++ (manual), Java/Python (garbage-collected).
+* **Important topics:** Leaks, dangling pointers, stack vs heap.
+
+---
+
+### 4. **Event-driven Programming**
+
+* **What it is:** Program flow is determined by events like user input, messages, or sensor output.
+* **Common in:** GUI apps, JavaScript (browser), embedded systems.
+* **Example:** Using an event loop to listen for user interactions.
+
+---
+
+### 5. **Object-Oriented Programming (OOP)**
+
+* **Core principles:** Encapsulation, Inheritance, Polymorphism, Abstraction.
+* **Why it's important:** Code reuse, scalability, modularity.
+* **Languages:** Java, C++, Python, C#.
+
+---
+
+### 6. **Data Structures & Algorithms**
+
+* **Common structures:** Arrays, linked lists, trees, stacks, queues, hash maps.
+* **Algorithms:** Sorting, searching, recursion, dynamic programming.
+* **Importance:** Core to problem-solving and performance optimization.
+
+---
+
+### 7. **Concurrency and Parallelism**
+
+* **Concurrency:** Multiple tasks making progress at the same time (logical).
+* **Parallelism:** Tasks running literally simultaneously (physical).
+* **Techniques:** Mutexes, semaphores, message passing.
+
+---
+
+### 8. **Networking Concepts**
+
+* **Sockets:** Low-level interface for communication.
+* **HTTP/HTTPS, REST APIs**
+* **Client-server models:** Often used in web and distributed systems.
+
+---
+
+### 9. **Design Patterns**
+
+* **What they are:** Reusable solutions to common software design problems.
+* **Examples:** Singleton, Observer, Factory, Strategy, MVC.
+
+---
+
+### 10. **Error Handling**
+
+* **Types:** Exceptions, return codes, logging.
+* **Best practices:** Fail gracefully, provide useful messages, avoid crashing.
+
+---
+
+Would you like a visual summary (diagram) of these concepts?
+
+
+Callbacks**
+
+A callback is a function passed as an argument to another function, which is then invoked ("called back") at a later time — either immediately, after a condition is met, or after an asynchronous operation completes.
+
+
+To decouple logic — caller doesn't need to know what the callback does.
+
+Enables custom behavior.
+Crucial for event-driven and asynchronous programming
+
+| Type             | Example                   |
+| ---------------- | ------------------------- |
+| **Synchronous**  | Immediate function call   |
+| **Asynchronous** | Deferred call (e.g., I/O) |
+| **Event-driven** | UI events, network events |
+
+🧰 When to Use
+Handling user interactions in GUIs.
+Processing API responses.
+Writing reusable libraries or middleware.
+Creating plugin systems.
+
+📌 1. Using Function Pointers
+#include <iostream>
+
+void greet(const std::string& name) {
+    std::cout << "Hello, " << name << "!\n";
+}
+
+void callFunction(void (*callback)(const std::string&), const std::string& name) {
+    callback(name);
+}
+
+int main() {
+    callFunction(greet, "Alice");
+    return 0;
+}
+
+📌 2. Using std::function (C++11 and above)
+#include <iostream>
+#include <functional>
+
+void greet(const std::string& name) {
+    std::cout << "Hello, " << name << "!\n";
+}
+
+void callFunction(std::function<void(const std::string&)> callback, const std::string& name) {
+    callback(name);
+}
+
+
+int main() {
+    callFunction(greet, "Bob");
+    return 0;
+}
+
+📌 3. Using Lambdas as Callbacks
+
+#include <iostream>
+#include <functional>
+
+void callFunction(std::function<void()> callback) {
+    callback();
+}
+
+int main() {
+    callFunction([]() {
+        std::cout << "Callback using a lambda!\n";
+    });
+    return 0;
+}
+
+📌 Example of a pattern which uses callbacks
+
+// EventDispatcher.h Header File
+#pragma once
+#include <functional>
+#include <vector>
+#include <string>
+
+class EventDispatcher {
+public:
+    using Callback = std::function<void(const std::string&)>;
+
+    void registerListener(const Callback& cb) {
+        listeners.push_back(cb);
+    }
+
+    void dispatch(const std::string& message) {
+        for (const auto& listener : listeners) {
+            listener(message);
+        }
+    }
+
+private:
+    std::vector<Callback> listeners;
+};
+
+Main.cpp
+
+#include "EventDispatcher.h"
+#include <iostream>
+
+int main() {
+    EventDispatcher dispatcher; // dispatcher object
+
+    // Register a logging callback
+    dispatcher.registerListener([](const std::string& msg) {
+        std::cout << "[LOG] " << msg << std::endl;
+    });
+
+    // Dispatch messages 
+	// This dispatch message can be triggered on some further events or states
+    dispatcher.dispatch("System started.");
+    dispatcher.dispatch("An error occurred during startup.");
+
+    return 0;
+}
+
+🔧 Problem: Custom Filter Function
+Write a function filterNumbers that takes:
+A vector of integers.
+A callback function that decides whether to keep a number.
+The function should return a new vector containing only the numbers for which the callback returns true.
+
+Answer:- 
+
+#include <iostream>
+#include <vector>
+#include <functional>
+
+std::vector<int> FilterFunction(const std::vector<int>& vec, std::function<bool(int)> callback) {
+    std::vector<int> new_vector;
+    for (auto element : vec) {
+        if (callback(element)) {
+            new_vector.push_back(element);
+        }
+    }
+    return new_vector;
+}
+
+int main() {
+    std::vector<int> sample = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    // Use a lambda to filter numbers greater than 5
+    std::vector<int> out = FilterFunction(sample, [](int a) { return a > 5; });
+
+    // Print filtered numbers on the same line
+    std::cout << "Filtered numbers greater than 5: ";
+    for (auto element : out) {
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    return 0;
+}
+
+🔧 Problem: Sort with Custom Comparator
+Objective:
+Write a function customSort that takes:
+
+A vector of integers.
+
+A callback function (lambda) that defines the sorting order (e.g., ascending or descending).
+
+Your task is to implement the customSort function that sorts the vector based on the criteria passed in the callback.
+
+Answer:- 
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <algorithm>  // For std::sort
+
+// customSort function definition
+void customSort(std::vector<int>& vec, std::function<bool(int, int)> callback) {
+    std::sort(vec.begin(), vec.end(), callback);  // Use vec.begin() and vec.end() for sorting
+}
+
+int main() {
+    std::cout << "Try programiz.pro" << std::endl;
+    std::vector<int> sample = {1, 2, 3, 4, 5};
+
+    // Sort using custom callback (sort by remainder when divided by 4)
+    customSort(sample, [](int a, int b) {
+        return (a % 4) >= (b % 4);  // Sorting in descending order based on modulus with 4
+    });
+
+    // Print the sorted vector
+    std::cout << "Sorted vector: ";
+    for (int num : sample) {
+        std::cout << num << " ";
+    }
+    std::cout << std::endl;
+
+    return 0;
+}
